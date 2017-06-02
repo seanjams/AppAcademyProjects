@@ -20,15 +20,24 @@ attr_reader :parent, :children, :value
 
   def parent=(node)
     #debugger
-    @parent = node unless @parent
-    node.children << self unless node.nil?
+    @parent.children.delete(self) unless @parent.nil?
+    @parent = node
+    node.children << self unless node.nil? || node.children.include?(self)
+
   end
 
   def add_child(node)
-    @children << node
+    #debugger
+    node.parent = self
+    @children << node unless @children.include?(node)
+
   end
 
-  def remove_child
+  def remove_child(node)
+
+    node.parent = nil
+    raise "node is not a child" unless self.children.include?(node)
+    self.children.delete(node)
   end
 
 
