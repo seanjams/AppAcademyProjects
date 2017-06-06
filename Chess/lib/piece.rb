@@ -1,4 +1,5 @@
 require 'singleton'
+require 'byebug'
 
 DELTAS = {side: [[1,0], [0,1], [-1,0], [0,-1]],
           diag: [[1,1], [1,-1], [-1,-1], [-1, 1]],
@@ -44,29 +45,39 @@ module SteppingPiece
   end
 
   def neighbors(current_pos, deltas)
-    result = []
-    deltas.each do |d|
-      result << [current_pos[0] + d[0], current_pos[1] + d[1]]
-    end
-    result
+    deltas.map { |d| [current_pos[0] + d[0], current_pos[1] + d[1]] }
   end
 end
 
 class Piece
-  attr_reader :value, :current_pos
+  attr_reader :value, :current_pos, :color
 
-  def initialize(value, board, current_pos)
+  def initialize(value, board, current_pos, color)
     @value = value
     @board = board
     @current_pos = current_pos
+    @color = color
   end
 
+  def valid_move?(end_pos)
+    flag1 = self.moves.include?(end_pos)
+    flag2 = @board[end_pos].color != @color || @board[end_pos].nil?
+    flag1 && flag2
+  end
+
+  def pos=(new_pos)
+    @current_pos = new_pos
+  end
 end
 
 class Queen < Piece
   include SlidingPiece
-  def initialize(board, current_pos)
-    super("Q", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♛", board, current_pos, color)
+    else
+      super("♕", board, current_pos, color)
+    end
   end
 
   def moves
@@ -76,8 +87,12 @@ end
 
 class Bishop < Piece
   include SlidingPiece
-  def initialize(board, current_pos)
-    super("B", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♝", board, current_pos, color)
+    else
+      super("♗", board, current_pos, color)
+    end
   end
 
   def moves
@@ -87,8 +102,12 @@ end
 
 class Rook < Piece
   include SlidingPiece
-  def initialize(board, current_pos)
-    super("R", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♜", board, current_pos, color)
+    else
+      super("♖", board, current_pos, color)
+    end
   end
 
   def moves
@@ -98,8 +117,12 @@ end
 
 class King < Piece
   include SteppingPiece
-  def initialize(board, current_pos)
-    super("K", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♚", board, current_pos, color)
+    else
+      super("♔", board, current_pos, color)
+    end
   end
 
   def moves
@@ -109,8 +132,12 @@ end
 
 class Knight < Piece
   include SteppingPiece
-  def initialize(board, current_pos)
-    super("N", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♞", board, current_pos, color)
+    else
+      super("♘", board, current_pos, color)
+    end
   end
 
   def moves
@@ -119,8 +146,23 @@ class Knight < Piece
 end
 
 class Pawn < Piece
-  def initialize(board, current_pos)
-    super("P", board, current_pos)
+  def initialize(board, current_pos, color)
+    if color == :black
+      super("♟", board, current_pos, color)
+    else
+      super("♙", board, current_pos, color)
+    end
+  end
+
+  def moves
+    if @color == :black
+      # debugger
+      move = [@current_pos[0] + 1, @current_pos[1]]
+    else
+      move = [@current_pos[0] - 1, @current_pos[1]]
+    end
+    return [move] if @board.in_bounds?(move)
+    nil
   end
 
 end

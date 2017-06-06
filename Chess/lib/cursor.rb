@@ -91,8 +91,6 @@ class Cursor
       nil
     when :ctrl_c
       Process.exit(0)
-    else
-      #else
     end
 
   end

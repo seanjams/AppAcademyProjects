@@ -11,8 +11,9 @@ class Board
   end
 
   def move_piece(start_pos, end_pos)
-    if self[start_pos].value && self[end_pos].value.nil?
+    if self[start_pos].valid_move?(end_pos)
       self[end_pos] = self[start_pos]
+      self[end_pos].pos = end_pos
       self[start_pos] = NullPiece.instance
     else
       raise "Not a valid move"
@@ -20,28 +21,32 @@ class Board
   end
 
   def populate_grid
+    color = :black
     [0,7].each do |i|
       (0..7).each do |j|
         pos = [i,j]
         case j
         when 0,7
-          self[pos] = Rook.new(self, pos)
+          self[pos] = Rook.new(self, pos, color)
         when 1,6
-          self[pos] = Knight.new(self, pos)
+          self[pos] = Knight.new(self, pos, color)
         when 2,5
-          self[pos] = Bishop.new(self, pos)
+          self[pos] = Bishop.new(self, pos, color)
         when 3
-          self[pos] = King.new(self, pos)
+          self[pos] = King.new(self, pos, color)
         when 4
-          self[pos] = Queen.new(self, pos)
+          self[pos] = Queen.new(self, pos, color)
         end
       end
+      color = :white
     end
 
+    color = :black
     [1,6].each do |i|
       (0..7).each do |j|
-        self[[i,j]] = Pawn.new(self, [i,j])
+        self[[i,j]] = Pawn.new(self, [i,j], color)
       end
+      color = :white
     end
 
     (2..5).each do |i|
@@ -63,7 +68,7 @@ class Board
   end
 
   def valid_move?(start_pos, end_pos)
-    true
+    flag1
   end
 
   def in_bounds?(pos)
