@@ -51,6 +51,7 @@ class Display
 end
 
 display = Display.new
+p display.board[[0,3]].moves
 # display.render
 # display.board.move_piece([0,0], [2,2])
 loop do

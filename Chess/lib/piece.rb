@@ -1,22 +1,55 @@
 require 'singleton'
 
+DELTAS = {side: [[1,0], [0,1], [-1,0], [0,-1]],
+          diag: [[1,1], [1,-1], [-1,-1], [-1, 1]],
+          knight: [[2,1], [1,2], [-2,1], [-1,2],
+                  [2,-1], [1,-2], [-2,-1], [-1,-2]]}
+
 module SlidingPiece
-  DELTAS = {horiz: [1,0], vert: [0,1], diag: [[1,1],[1,-1]] }
-
-  def moves(move_dirs)
-    move_dirs.each do
-
+  def move_positions(current_pos, opts = {})
+    defaults = { side: false, diag: false }
+    opts = defaults.merge(opts)
+    result = []
+    opts.select{|k,v| v}.each do |dir, _|
+      DELTAS[dir].each do |d|
+        pos = sum(current_pos, d)
+        while pos.all? { |x| x.between?(0,7) }
+          result << pos
+          pos = sum(pos, d)
+        end
+      end
     end
+    result
   end
 
+  def sum(pos, d)
+    [pos[0] + d[0], pos[1] + d[1]]
+  end
 end
 
 module SteppingPiece
-
-  def moves()
-
+  def move_positions(current_pos, opts = {})
+    defaults = { king: false, knight: false }
+    opts = defaults.merge(opts)
+    if opts[:knight]
+      neighbors(current_pos, DELTAS[:knight]).select do |neighbor|
+        neighbor.all? { |x| x.between?(0,7) }
+      end
+    elsif opts[:king]
+      potentials = neighbors(current_pos, DELTAS[:side] + DELTAS[:diag])
+      potentials.select do |neighbor|
+        neighbor.all? { |x| x.between?(0,7) }
+      end
+    end
   end
 
+  def neighbors(current_pos, deltas)
+    result = []
+    deltas.each do |d|
+      result << [current_pos[0] + d[0], current_pos[1] + d[1]]
+    end
+    result
+  end
 end
 
 class Piece
@@ -28,10 +61,6 @@ class Piece
     @current_pos = current_pos
   end
 
-  def moves
-
-  end
-
 end
 
 class Queen < Piece
@@ -40,8 +69,8 @@ class Queen < Piece
     super("Q", board, current_pos)
   end
 
-  def move_dirs
-
+  def moves
+    move_positions(@current_pos, side: true, diag: true)
   end
 end
 
@@ -51,8 +80,8 @@ class Bishop < Piece
     super("B", board, current_pos)
   end
 
-  def move_dirs
-
+  def moves
+    move_positions(@current_pos, diag: true)
   end
 end
 
@@ -62,8 +91,8 @@ class Rook < Piece
     super("R", board, current_pos)
   end
 
-  def move_dirs
-
+  def moves
+    move_positions(@current_pos, side: true)
   end
 end
 
@@ -73,6 +102,9 @@ class King < Piece
     super("K", board, current_pos)
   end
 
+  def moves
+    move_positions(@current_pos, king: true)
+  end
 end
 
 class Knight < Piece
@@ -81,12 +113,16 @@ class Knight < Piece
     super("N", board, current_pos)
   end
 
+  def moves
+    move_positions(@current_pos, knight: true)
+  end
 end
 
 class Pawn < Piece
   def initialize(board, current_pos)
     super("P", board, current_pos)
   end
+
 end
 
 class NullPiece < Piece
