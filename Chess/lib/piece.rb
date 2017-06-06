@@ -3,8 +3,10 @@ require 'singleton'
 module SlidingPiece
   DELTAS = {horiz: [1,0], vert: [0,1], diag: [[1,1],[1,-1]] }
 
-  def moves()
+  def moves(move_dirs)
+    move_dirs.each do
 
+    end
   end
 
 end
@@ -18,12 +20,12 @@ module SteppingPiece
 end
 
 class Piece
-  attr_reader :value
+  attr_reader :value, :current_pos
 
   def initialize(value, board, current_pos)
     @value = value
     @board = board
-    @pos = current_pos
+    @current_pos = current_pos
   end
 
   def moves

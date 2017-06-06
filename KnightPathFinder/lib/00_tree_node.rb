@@ -1,6 +1,7 @@
 require 'byebug'
 
 class PolyTreeNode
+  attr_reader :value, :parent, :children
 
   def initialize(value, parent = nil, children = [])
     @value = value
@@ -8,45 +9,34 @@ class PolyTreeNode
     @children = children
   end
 
-  attr_reader :parent, :children, :value
-  # def parent
-  # end
-  #
-  # def children
-  # end
-  #
-  # def value
-  # end
-
-  def parent=(node)
-    #debugger
-    @parent.children.delete(self) unless @parent.nil?
-    @parent = node
-    node.children << self unless node.nil? || node.children.include?(self)
-
-  end
-
   def add_child(*nodes)
-    #debugger
     nodes.each do |node|
-      node.parent = self
-      @children << node unless @children.include?(node)
+      unless @children.include?(node)
+        @children << node
+        node.parent = self
+      end
     end
   end
 
   def remove_child(*nodes)
     nodes.each do |node|
+      raise "node is not a child" unless @children.include?(node)
+      @children.delete(node)
       node.parent = nil
-      raise "node is not a child" unless self.children.include?(node)
-      self.children.delete(node)
+    end
+  end
+
+  def parent=(node)
+    @parent.children.delete(self) unless @parent.nil?
+    @parent = node
+    unless node.nil? || node.children.include?(self)
+      node.children << self
     end
   end
 
   def dfs(target_value)
-    # p self.value
-    return self if self.value == target_value
-    #inductive step
-    self.children.each do |child|
+    return self if @value == target_value
+    @children.each do |child|
       result = child.dfs(target_value)
       return result if result
     end
@@ -54,10 +44,7 @@ class PolyTreeNode
   end
 
   def bfs(target_value)
-    # debugger
-
     queue = [self]
-    # return self.value if target_value == self.value
     until queue.empty?
       cur_node = queue.shift
       if cur_node.value == target_value
@@ -68,7 +55,6 @@ class PolyTreeNode
     end
     nil
   end
-
 
 end
 
