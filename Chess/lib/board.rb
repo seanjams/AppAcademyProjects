@@ -5,17 +5,22 @@ class Board
   attr_reader :grid
 
   def initialize
-    @grid = Array.new(8) { Array.new(8) }
-    2.times do |i|
-      @grid[i] = Array.new(8) { Piece.new("A") }
-      @grid[7-i] = Array.new(8) { Piece.new("A") }
+    @grid = Array.new(4) { Array.new(8) }
+    royal_row = [Rook.new, Knight.new, Bishop.new, King.new,
+                Queen.new, Bishop.new, Knight.new, Rook.new]
+    pawn_row = Array.new(8) { Pawn.new }
+    [pawn_row, royal_row].each do |row|
+      @grid.unshift(row.dup)
+      @grid.push(row.dup)
     end
   end
 
   def move_piece(start_pos, end_pos)
-    unless self[start_pos].nil? || !valid_move?(start_pos, end_pos)
+    if self[start_pos] && !self[end_pos]
       self[end_pos] = self[start_pos]
       self[start_pos] = nil
+    else
+      raise "Not a valid move"
     end
   end
 
