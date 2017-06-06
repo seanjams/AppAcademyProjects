@@ -4,24 +4,52 @@ require 'byebug'
 class Board
   attr_reader :grid
 
+
   def initialize
-    @grid = Array.new(4) { Array.new(8) }
-    royal_row = [Rook.new, Knight.new, Bishop.new, King.new,
-                Queen.new, Bishop.new, Knight.new, Rook.new]
-    pawn_row = Array.new(8) { Pawn.new }
-    [pawn_row, royal_row].each do |row|
-      @grid.unshift(row.dup)
-      @grid.push(row.dup)
-    end
+    @grid = Array.new(8) { Array.new(8) }
+    populate_grid
   end
 
   def move_piece(start_pos, end_pos)
-    if self[start_pos] && !self[end_pos]
+    if self[start_pos].value && self[end_pos].value.nil?
       self[end_pos] = self[start_pos]
-      self[start_pos] = nil
+      self[start_pos] = NullPiece.instance
     else
       raise "Not a valid move"
     end
+  end
+
+  def populate_grid
+    [0,7].each do |i|
+      (0..7).each do |j|
+        pos = [i,j]
+        case j
+        when 0,7
+          self[pos] = Rook.new(self, pos)
+        when 1,6
+          self[pos] = Knight.new(self, pos)
+        when 2,5
+          self[pos] = Bishop.new(self, pos)
+        when 3
+          self[pos] = King.new(self, pos)
+        when 4
+          self[pos] = Queen.new(self, pos)
+        end
+      end
+    end
+
+    [1,6].each do |i|
+      (0..7).each do |j|
+        self[[i,j]] = Pawn.new(self, [i,j])
+      end
+    end
+
+    (2..5).each do |i|
+      (0..7).each do |j|
+        self[[i,j]] = NullPiece.instance
+      end
+    end
+
   end
 
   def [](pos)
@@ -41,6 +69,7 @@ class Board
   def in_bounds?(pos)
     pos.all? { |x| x.between?(0,7) }
   end
+
 end
 
 # board = Board.new

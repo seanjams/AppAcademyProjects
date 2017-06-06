@@ -15,7 +15,7 @@ class Display
       row_str = []
       board.grid[row].each_index do |col|
         pos = [row,col]
-        tile = board[pos] ? board[pos].value : " "
+        tile = board[pos].value ? board[pos].value : " "
         if pos == @cursor.cursor_pos
           if @cursor.selected
             row_str << tile.colorize(:background => :red)
