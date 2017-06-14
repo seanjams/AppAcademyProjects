@@ -36,7 +36,10 @@ class Board
   end
 
   def render
+    puts "///MEMORY///"
+    puts "  " + (1..@grid.length).to_a.join(" ")
     (0...@grid.length).each do |row|
+      print "#{row+1} "
       (0...@grid[0].length).each do |col|
         pos = [row, col]
         self[pos].display
