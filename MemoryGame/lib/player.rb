@@ -1,10 +1,12 @@
 class HumanPlayer
 
   def get_guess
-    puts "pick first guess: "
+    print "pick first guess (x,y) : "
     guess1 = gets.chomp.split(',').map(&:to_i)
-    puts "pick second guess: "
+    guess1.map! { |x| x-1 }
+    print "pick second guess (x,y) : "
     guess2 = gets.chomp.split(',').map(&:to_i)
+    guess2.map! { |x| x-1 }
     [guess1, guess2]
   end
 
@@ -39,7 +41,7 @@ class ComputerPlayer
     guess2 = calculate_guess until guess1 != guess2
     add_move(guess1)
     add_move(guess2)
-    puts @moves.to_s
+#    puts @moves.to_s
     [guess1, guess2]
   end
 
