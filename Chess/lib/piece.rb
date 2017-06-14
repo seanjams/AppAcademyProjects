@@ -7,23 +7,26 @@ DELTAS = {side: [[1,0], [0,1], [-1,0], [0,-1]],
                   [2,-1], [1,-2], [-2,-1], [-1,-2]]}
 
 module SlidingPiece
-  def move_positions(current_pos, opts = {})
+  def move_positions(pos, opts = {})
     defaults = { side: false, diag: false }
     opts = defaults.merge(opts)
     result = []
     opts.select{|k,v| v}.each do |dir, _|
       DELTAS[dir].each do |d|
-        pos = sum(current_pos, d)
-        while pos.all? { |x| x.between?(0,7) }
+        # debugger
+        pos = step(current_pos, d)
+        until out_of_bounds?(pos) || own_piece_in_way?(pos)
           result << pos
-          pos = sum(pos, d)
+          break if enemy_piece_at?(pos)
+          pos = step(pos, d)
         end
+        # result << pos if enemy_piece_at?(pos) && !out_of_bounds?(pos)
       end
     end
     result
   end
 
-  def sum(pos, d)
+  def step(pos, d)
     [pos[0] + d[0], pos[1] + d[1]]
   end
 end
@@ -50,7 +53,7 @@ module SteppingPiece
 end
 
 class Piece
-  attr_reader :value, :current_pos, :color
+  attr_reader :value, :board, :current_pos, :color
 
   def initialize(value, board, current_pos, color)
     @value = value
@@ -60,9 +63,23 @@ class Piece
   end
 
   def valid_move?(end_pos)
-    flag1 = self.moves.include?(end_pos)
-    flag2 = @board[end_pos].color != @color || @board[end_pos].nil?
+    flag1 = moves.include?(end_pos)
+    flag2 = !own_piece_in_way?(end_pos)
     flag1 && flag2
+  end
+
+  def own_piece_in_way?(pos)
+    @board[pos].value &&
+      @board[pos].color == @color &&
+      @board[pos] != self
+  end
+
+  def enemy_piece_at?(pos)
+    @board[pos].value && @board[pos].color != @color
+  end
+
+  def out_of_bounds?(pos)
+    !@board.in_bounds?(pos)
   end
 
   def pos=(new_pos)
@@ -156,7 +173,6 @@ class Pawn < Piece
 
   def moves
     if @color == :black
-      # debugger
       move = [@current_pos[0] + 1, @current_pos[1]]
     else
       move = [@current_pos[0] - 1, @current_pos[1]]
