@@ -1,0 +1,9 @@
+<h1>ALL BANDS</h1>
+
+<ul>
+<% @bands.each do |band| %>
+  <li>
+    <%= link_to band.name, albums_url, method: :get %>
+  </li>
+<% end %>
+</ul>
